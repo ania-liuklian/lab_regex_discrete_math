@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-
-
+import argparse
+import sys
 class State(ABC):
     @abstractmethod
     def __init__(self) -> None:
@@ -189,12 +189,22 @@ class RegexFSM:
 
         return isinstance(current_state, TerminationState) or any(
             isinstance(s, TerminationState) for s in current_state.next_states)
+def main() -> None:
+
+    parser = argparse.ArgumentParser(description="Simple Regex Matcher")
+    parser.add_argument("pattern", help="Regex pattern")
+    parser.add_argument("strings", nargs="+", help="Strings to test")
+
+    args = parser.parse_args()
+
+    try:
+        fsm = RegexFSM(args.pattern)
+    except AttributeError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    for s in args.strings:
+        result = fsm.check_string(s)
+        print(result)
 
 if __name__ == "__main__":
-    regex_pattern = "a*4.+hi"
-
-    regex_compiled = RegexFSM(regex_pattern)
-
-    print(regex_compiled.check_string("aaaaaa4uhi"))  # True
-    print(regex_compiled.check_string("4uhi"))  # True
-    print(regex_compiled.check_string("meow"))  # False
+    main()
